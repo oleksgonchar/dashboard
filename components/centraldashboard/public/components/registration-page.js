@@ -17,7 +17,6 @@ import './resources/animated-checkmark.js';
 import css from './registration-page.css';
 import template from './registration-page.pug';
 import logo from '../assets/logo.svg';
-import {templateContent} from './resources/template-utils.js';
 
 import utilitiesMixin from './utilities-mixin.js';
 
@@ -27,8 +26,8 @@ import utilitiesMixin from './utilities-mixin.js';
 export class RegistrationPage extends utilitiesMixin(PolymerElement) {
     static get template() {
         const vars = {logo};
-        return html(templateContent(
-            `<style>${css.toString()}</style>${template(vars)}`));
+        return html([
+            `<style>${css.toString()}</style>${template(vars)}`]);
     }
 
     static get properties() {

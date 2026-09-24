@@ -17,10 +17,6 @@ const TEMPLATE = `
 `;
 const user = 'test@kubeflow.org';
 const ownedNs = {namespace: 'ns1', role: 'owner'};
-const contribList = [
-    {user: 'foo@kubeflow.org', role: 'contributor'},
-    {user: 'bar@kubeflow.org', role: 'viewer'},
-];
 
 describe('Manage Users View Contributor', () => {
     let manageUsersViewContributor;
@@ -67,44 +63,16 @@ describe('Manage Users View Contributor', () => {
             .toBe('Failed for test');
     });
 
-    ['handleContribCreate', 'handleContribDelete'].forEach((handler) => {
-        it(`Should show friendly message on body-less 403 from ${handler}`, () => {
-            const fakeEvent = {
-                detail: {
-                    error: 'The request failed with status code: 403',
-                    request: {status: 403, response: null},
-                },
-            };
-            manageUsersViewContributor[handler](fakeEvent);
-
-            expect(manageUsersViewContributor.contribCreateError)
-                .toBe('You are not authorized to perform this action.');
-        });
-
-        it(`Should preserve backend error on 403 from ${handler}`, () => {
-            const backendError = 'RoleBinding operation failed: already exists';
-            const fakeEvent = {
-                detail: {
-                    error: 'The request failed with status code: 403',
-                    request: {status: 403, response: {error: backendError}},
-                },
-            };
-            manageUsersViewContributor[handler](fakeEvent);
-
-            expect(manageUsersViewContributor.contribCreateError)
-                .toBe(backendError);
-        });
-    });
-
     it('Should add contributors correctly', async () => {
-        const updatedList = [{user: 'ap@kubeflow.org', role: 'contributor'}];
+        const contribList = ['foo@kubeflow.org', 'bar@kubeflow.org'];
+        const verificationContribs = ['ap@kubeflow.org'];
         mockIronAjax(
             manageUsersViewContributor.$.GetContribsAjax,
             contribList,
         );
         mockIronAjax(
             manageUsersViewContributor.$.AddContribAjax,
-            updatedList,
+            verificationContribs,
         );
 
         manageUsersViewContributor.user = user;
@@ -121,20 +89,21 @@ describe('Manage Users View Contributor', () => {
 
         expect(manageUsersViewContributor.contributorList)
             .toEqual(
-                updatedList,
+                verificationContribs,
                 'Invalid list of contributors'
             );
     });
 
     it('Should remove contributors correctly', async () => {
-        const updatedList = [{user: 'ap@kubeflow.org', role: 'contributor'}];
+        const contribList = ['foo@kubeflow.org', 'bar@kubeflow.org'];
+        const verificationContribs = ['ap@kubeflow.org'];
         mockIronAjax(
             manageUsersViewContributor.$.GetContribsAjax,
             contribList,
         );
         mockIronAjax(
             manageUsersViewContributor.$.RemoveContribAjax,
-            updatedList,
+            verificationContribs,
         );
 
         manageUsersViewContributor.user = user;
@@ -143,20 +112,20 @@ describe('Manage Users View Contributor', () => {
         flush();
         await yieldForRequests();
 
-        manageUsersViewContributor.removeContributor(
-            {model: {item: contribList[0]}}
-        );
+        const chip = manageUsersViewContributor.shadowRoot.querySelector('md2-input paper-chip:nth-of-type(1)');
+        chip.fireRemove({});
 
         await yieldForRequests();
 
         expect(manageUsersViewContributor.contributorList)
             .toEqual(
-                updatedList,
+                verificationContribs,
                 'Invalid list of contributors'
             );
     });
 
     it('UI State should show contribs when namespace available', async () => {
+        const contribList = ['foo@kubeflow.org', 'bar@kubeflow.org'];
         mockIronAjax(
             manageUsersViewContributor.$.GetContribsAjax,
             contribList,
@@ -171,6 +140,7 @@ describe('Manage Users View Contributor', () => {
         expect(manageUsersViewContributor.shadowRoot.querySelector('h2 > .text').innerText)
             .toBe('Contributors for - ns1');
 
+        // View prop expectations
         expect(manageUsersViewContributor.contributorList)
             .toEqual(
                 contribList,

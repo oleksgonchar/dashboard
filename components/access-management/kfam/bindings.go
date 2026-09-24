@@ -15,7 +15,6 @@
 package kfam
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -130,7 +129,7 @@ func (c *BindingClient) Create(binding *Binding, userIdHeader string, userIdPref
 			*binding.User,
 		},
 	}
-	_, err = c.kubeClient.RbacV1().RoleBindings(binding.ReferredNamespace).Create(context.TODO(), &roleBinding, metav1.CreateOptions{})
+	_, err = c.kubeClient.RbacV1().RoleBindings(binding.ReferredNamespace).Create(&roleBinding)
 	if err != nil {
 		return err
 	}
@@ -151,7 +150,7 @@ func (c *BindingClient) Create(binding *Binding, userIdHeader string, userIdPref
 		Namespace(binding.ReferredNamespace).
 		Resource(AuthorizationPolicy).
 		Body(istioAuth).
-		Do(context.TODO()).
+		Do().
 		Into(&result)
 }
 
@@ -173,13 +172,13 @@ func (c *BindingClient) Delete(binding *Binding) error {
 		Resource(AuthorizationPolicy).
 		Name(bindingName).
 		VersionedParams(&metav1.GetOptions{}, scheme.ParameterCodec).
-		Do(context.TODO()).
+		Do().
 		Into(&result)
 	if err != nil {
 		return err
 	}
 	// Delete if exists
-	err = c.kubeClient.RbacV1().RoleBindings(binding.ReferredNamespace).Delete(context.TODO(), bindingName, metav1.DeleteOptions{})
+	err = c.kubeClient.RbacV1().RoleBindings(binding.ReferredNamespace).Delete(bindingName, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -189,7 +188,7 @@ func (c *BindingClient) Delete(binding *Binding) error {
 		Resource(AuthorizationPolicy).
 		Name(bindingName).
 		Body(&metav1.DeleteOptions{}).
-		Do(context.TODO()).
+		Do().
 		Error()
 }
 

@@ -3,9 +3,9 @@ import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/social-icons.js';
 import '@polymer/paper-toast/paper-toast.js';
-import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
-import '@polymer/paper-listbox/paper-listbox.js';
-import '@polymer/paper-item/paper-item.js';
+import '@polymer/paper-ripple/paper-ripple.js';
+import '@polymer/paper-item/paper-icon-item.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
 
 import {html, PolymerElement} from '@polymer/polymer';
 
@@ -14,14 +14,13 @@ import './resources/md2-input/md2-input.js';
 import css from './manage-users-view-contributor.css';
 import template from './manage-users-view-contributor.pug';
 import utilitiesMixin from './utilities-mixin.js';
-import {templateContent} from './resources/template-utils.js';
 
 export class ManageUsersViewContributor extends utilitiesMixin(PolymerElement) {
     static get template() {
-        return html(templateContent(`
+        return html([`
             <style>${css.toString()}</style>
             ${template()}
-        `));
+        `]);
     }
 
     /**
@@ -32,49 +31,34 @@ export class ManageUsersViewContributor extends utilitiesMixin(PolymerElement) {
             user: {type: String, value: 'Loading...'},
             ownedNamespace: {type: Object, value: () => ({})},
             newContribEmail: String,
-            newContribRole: {type: String, value: 'contributor'},
-            _removingRole: {type: String, value: 'contributor'},
             contribError: Object,
+            contributorInputEl: Object,
         };
     }
-
     /**
-     * Computes the add URL based on the selected role.
-     * @param {string} namespace
-     * @param {string} role
-     * @return {string}
+     * Main ready method for Polymer Elements.
      */
-    _addUrl(namespace, role) {
-        const endpoint = role === 'viewer' ? 'add-viewer' : 'add-contributor';
-        return `/api/workgroup/${endpoint}/${namespace}`;
+    ready() {
+        super.ready();
+        this.contributorInputEl = this.$.ContribEmail;
     }
+
     /**
      * Triggers an API call to create a new Contributor
      */
     addNewContrib() {
+        // Need to call the api directly here.
         const api = this.$.AddContribAjax;
         api.body = {contributor: this.newContribEmail};
         api.generateRequest();
-    }
-    /**
-     * Computes the remove URL based on the role being removed.
-     * @param {string} namespace
-     * @param {string} role
-     * @return {string}
-     */
-    _removeUrl(namespace, role) {
-        const endpoint =
-            role === 'viewer' ? 'remove-viewer' : 'remove-contributor';
-        return `/api/workgroup/${endpoint}/${namespace}`;
     }
     /**
      * Triggers an API call to remove a Contributor
      * @param {Event} e
      */
     removeContributor(e) {
-        this._removingRole = e.model.item.role;
         const api = this.$.RemoveContribAjax;
-        api.body = {contributor: e.model.item.user};
+        api.body = {contributor: e.model.item};
         api.generateRequest();
     }
     /**
@@ -84,11 +68,7 @@ export class ManageUsersViewContributor extends utilitiesMixin(PolymerElement) {
      * @return {string}
      */
     _isolateErrorFromIronRequest(e) {
-        const status = e.detail.request.status;
-        const bd = e.detail.request.response || {};
-        if (status === 403 && !bd.error) {
-            return 'You are not authorized to perform this action.';
-        }
+        const bd = e.detail.request.response||{};
         return bd.error || e.detail.error || e.detail;
     }
     /**

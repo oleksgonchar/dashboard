@@ -5,13 +5,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 import css from './md2-input.css';
 import htmlContainer from './md2-input.pug';
 import utilitiesMixin from '../../utilities-mixin.js';
-import {templateContent} from '../template-utils.js';
 
 export class Md2Input extends utilitiesMixin(PolymerElement) {
     static get template() {
-        return html(templateContent(
-            `<style>${css.toString()}</style>${htmlContainer()}`
-        ));
+        return html([
+            `<style>${css.toString()}</style>${htmlContainer()}`,
+        ]);
     }
     static get properties() {
         return {

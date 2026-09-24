@@ -9,7 +9,6 @@ import {html, PolymerElement} from '@polymer/polymer';
 
 import css from './dashboard-view.css';
 import template from './dashboard-view.pug';
-import {templateContent} from './resources/template-utils.js';
 import './card-styles.js';
 import './iframe-link.js';
 import './notebooks-card.js';
@@ -21,12 +20,12 @@ import utilitiesMixin from './utilities-mixin.js';
 
 export class DashboardView extends utilitiesMixin(PolymerElement) {
     static get template() {
-        return html(templateContent(`
+        return html([`
             <style include="card-styles">
                 ${css.toString()}
             </style>
             ${template()}
-        `));
+        `]);
     }
 
     /**

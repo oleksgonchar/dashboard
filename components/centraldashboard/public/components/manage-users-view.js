@@ -15,17 +15,16 @@ import {html, PolymerElement} from '@polymer/polymer';
 
 import css from './manage-users-view.css';
 import template from './manage-users-view.pug';
-import {templateContent} from './resources/template-utils.js';
 
 import './manage-users-view-contributor.js';
 import utilitiesMixin from './utilities-mixin.js';
 
 export class ManageUsersView extends utilitiesMixin(PolymerElement) {
     static get template() {
-        return html(templateContent(`
+        return html([`
             <style>${css.toString()}</style>
             ${template()}
-        `));
+        `]);
     }
 
     /**
